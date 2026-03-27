@@ -1,0 +1,94 @@
+{
+  "common": {
+    "appName": "কাজ লাগবে",
+    "loading": "লোড হচ্ছে...",
+    "error": "কিছু ভুল হয়েছে",
+    "success": "সফল!",
+    "cancel": "বাতিল",
+    "confirm": "নিশ্চিত",
+    "save": "সংরক্ষণ",
+    "edit": "সম্পাদনা",
+    "delete": "মুছে দিন",
+    "search": "খুঁজুন",
+    "seeAll": "সব দেখুন"
+  },
+  "nav": {
+    "home": "হোম",
+    "search": "খুঁজুন",
+    "bookings": "বুকিং",
+    "profile": "প্রোফাইল"
+  },
+  "home": {
+    "greeting": "কি কাজ লাগবে ভাই? 😄",
+    "subtitle": "আপনার পাশে সবসময়",
+    "searchPlaceholder": "কি খুঁজতেছেন?",
+    "nearbyProviders": "আশেপাশের লোক",
+    "popularServices": "জনপ্রিয় সার্ভিস",
+    "noProvidersNearby": "আপনার আশেপাশে কেউ নেই"
+  },
+  "services": {
+    "electrician": "ইলেকট্রিশিয়ান",
+    "plumber": "প্লাম্বার",
+    "acRepair": "এসি মেরামত",
+    "cleaner": "ক্লিনার",
+    "tutor": "টিউটর",
+    "mechanic": "মেকানিক",
+    "selectService": "সার্ভিস বাছুন",
+    "basePrice": "শুরুর দাম",
+    "estimatedTime": "সময়"
+  },
+  "booking": {
+    "newBooking": "নতুন বুকিং",
+    "selectProvider": "লোক বাছুন",
+    "enterAddress": "ঠিকানা দিন",
+    "estimatedPrice": "আনুমানিক দাম",
+    "confirmBooking": "বুকিং নিশ্চিত করুন",
+    "status": {
+      "pending": "অপেক্ষায়",
+      "accepted": "অ্যাকসেপ্টেড",
+      "inProgress": "চলছে",
+      "completed": "শেষ",
+      "cancelled": "বাতিল"
+    },
+    "track": "ট্র্যাক করুন",
+    "cancel": "বুকিং বাতিল"
+  },
+  "auth": {
+    "signIn": "সাইন ইন",
+    "signUp": "সাইন আপ",
+    "signOut": "সাইন আউট",
+    "welcome": "স্বাগতম!",
+    "phoneNumber": "ফোন নম্বর",
+    "continueAsProvider": "সার্ভিস প্রোভাইডার হিসেবে যোগ দিন"
+  },
+  "provider": {
+    "becomeProvider": "সার্ভিস প্রোভাইডার হন",
+    "myJobs": "আমার কাজ",
+    "earnings": "আয়",
+    "availability": "উপলব্ধতা",
+    "online": "অনলাইন",
+    "offline": "অফলাইন",
+    "busy": "ব্যস্ত",
+    "accept": "অ্যাকসেপ্ট",
+    "reject": "রিজেক্ট",
+    "rating": "রেটিং",
+    "jobsCompleted": "কাজ শেষ"
+  },
+  "review": {
+    "rateService": "সার্ভিস রেট করুন",
+    "writeReview": "রিভিউ লিখুন",
+    "submitReview": "সাবমিট"
+  },
+  "profile": {
+    "editProfile": "প্রোফাইল সম্পাদনা",
+    "myReviews": "আমার রিভিউ",
+    "settings": "সেটিংস",
+    "language": "ভাষা",
+    "notifications": "নোটিফিকেশন"
+  },
+  "errors": {
+    "noProviders": "কোনো প্রোভাইডার পাওয়া যায়নি",
+    "networkError": "ইন্টারনেট সমস্যা",
+    "tryAgain": "আবার চেষ্টা করুন"
+  }
+}

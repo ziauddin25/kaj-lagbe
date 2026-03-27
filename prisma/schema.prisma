@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  PROVIDER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  ON_THE_WAY
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum ProviderStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  name          String
+  phone         String    @unique
+  avatar        String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  bookings      Booking[] @relation("UserBookings")
+  reviews       Review[]  @relation("UserReviews")
+  provider      Provider?
+}
+
+model Provider {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio             String?
+  skills          String[]
+  basePrice       Int           @default(300)
+  status          ProviderStatus @default(OFFLINE)
+  isApproved      Boolean       @default(false)
+  latitude        Float?
+  longitude       Float?
+  address         String?
+  area            String?
+  totalJobs       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  bookings        Booking[]     @relation("ProviderBookings")
+  reviews         Review[]       @relation("ProviderReviews")
+  categories      ProviderCategory[]
+}
+
+model Category {
+  id            String    @id @default(cuid())
+  name          String
+  nameBn        String
+  icon          String
+  basePrice     Int
+  estimatedTime Int
+  description   String?
+  descriptionBn String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  providers     ProviderCategory[]
+  bookings      Booking[]
+}
+
+model ProviderCategory {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  customPrice Int?
+  
+  @@unique([providerId, categoryId])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation("UserBookings", fields: [userId], references: [id])
+  providerId      String?
+  provider        Provider?     @relation("ProviderBookings", fields: [providerId], references: [id])
+  categoryId      String
+  category        Category      @relation(fields: [categoryId], references: [id])
+  status          BookingStatus @default(PENDING)
+  description     String?
+  address         String
+  phone           String
+  latitude        Float?
+  longitude       Float?
+  area            String?
+  estimatedPrice  Int
+  finalPrice      Int?
+  scheduledTime   DateTime?
+  startTime       DateTime?
+  endTime         DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  review          Review?
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  userId      String
+  user        User     @relation("UserReviews", fields: [userId], references: [id])
+  providerId  String
+  provider    Provider @relation("ProviderReviews", fields: [providerId], references: [id])
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+}

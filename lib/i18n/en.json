@@ -1,0 +1,94 @@
+{
+  "common": {
+    "appName": "Kaj Lagbe",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Success!",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "seeAll": "See all"
+  },
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "bookings": "Bookings",
+    "profile": "Profile"
+  },
+  "home": {
+    "greeting": "What service do you need?",
+    "subtitle": "Always by your side",
+    "searchPlaceholder": "What are you looking for?",
+    "nearbyProviders": "Nearby Providers",
+    "popularServices": "Popular Services",
+    "noProvidersNearby": "No providers nearby"
+  },
+  "services": {
+    "electrician": "Electrician",
+    "plumber": "Plumber",
+    "acRepair": "AC Repair",
+    "cleaner": "Cleaner",
+    "tutor": "Tutor",
+    "mechanic": "Mechanic",
+    "selectService": "Select Service",
+    "basePrice": "Starting Price",
+    "estimatedTime": "Estimated Time"
+  },
+  "booking": {
+    "newBooking": "New Booking",
+    "selectProvider": "Select Provider",
+    "enterAddress": "Enter Address",
+    "estimatedPrice": "Estimated Price",
+    "confirmBooking": "Confirm Booking",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "track": "Track",
+    "cancel": "Cancel Booking"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "welcome": "Welcome!",
+    "phoneNumber": "Phone Number",
+    "continueAsProvider": "Join as a Service Provider"
+  },
+  "provider": {
+    "becomeProvider": "Become a Provider",
+    "myJobs": "My Jobs",
+    "earnings": "Earnings",
+    "availability": "Availability",
+    "online": "Online",
+    "offline": "Offline",
+    "busy": "Busy",
+    "accept": "Accept",
+    "reject": "Reject",
+    "rating": "Rating",
+    "jobsCompleted": "Jobs Completed"
+  },
+  "review": {
+    "rateService": "Rate Service",
+    "writeReview": "Write Review",
+    "submitReview": "Submit"
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "myReviews": "My Reviews",
+    "settings": "Settings",
+    "language": "Language",
+    "notifications": "Notifications"
+  },
+  "errors": {
+    "noProviders": "No providers found",
+    "networkError": "Network error",
+    "tryAgain": "Try again"
+  }
+}
