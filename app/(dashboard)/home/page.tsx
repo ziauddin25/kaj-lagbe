@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, MapPin, Zap, Droplets, Wind, Sparkles, GraduationCap, Wrench, Star } from "lucide-react";
+import { Search, MapPin, Zap, Droplets, Wind, Sparkles, GraduationCap, Wrench, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -178,7 +178,7 @@ export default function HomeScreen() {
                 onClick={() => setSearchQuery("")}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
               >
-                ✕
+                <X />
               </button>
             )}
           </div>
