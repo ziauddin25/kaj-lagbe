@@ -33,14 +33,6 @@ interface Provider {
   price: number;
 }
 
-const mockProviders: Provider[] = [
-  { id: 'p1', name: 'রহিম উদ্দিন', rating: 4.8, jobs: 127, area: 'মিরপুর', status: 'available', price: 300 },
-  { id: 'p2', name: 'করিম শেখ', rating: 4.5, jobs: 89, area: 'উত্তরা', status: 'available', price: 250 },
-  { id: 'p3', name: 'সুমন হোসেন', rating: 4.9, jobs: 203, area: 'ধানমন্ডি', status: 'busy', price: 500 },
-  { id: 'p4', name: 'জাহিদ হাসান', rating: 4.3, jobs: 56, area: 'গুলশান', status: 'available', price: 350 },
-  { id: 'p5', name: 'আল-আমিন', rating: 4.7, jobs: 145, area: 'বনানী', status: 'offline', price: 400 },
-];
-
 export default function HomeScreen() {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -74,54 +66,49 @@ export default function HomeScreen() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      let categoriesData: any[] = [];
+      const API_URL = 'http://localhost:4000';
+
       try {
-        const categoriesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/categories`, { headers });
+        const categoriesRes = await fetch(`${API_URL}/categories`, { headers });
         if (categoriesRes.ok) {
-          categoriesData = await categoriesRes.json();
+          const categoriesData = await categoriesRes.json();
+          if (categoriesData.length > 0) {
+            setCategories(categoriesData.map((c: any) => ({
+              id: c.id,
+              icon: Zap,
+              name: c.name,
+              nameBn: c.nameBn,
+              price: c.basePrice,
+              color: getCategoryColor(c.name),
+            })));
+          }
         }
-      } catch {
-        console.log('Categories API not available, using defaults');
+      } catch (e) {
+        console.log('Categories API error:', e);
       }
 
-      if (categoriesData.length > 0) {
-        setCategories(categoriesData.map((c: any) => ({
-          id: c.id,
-          icon: Zap,
-          name: c.name,
-          nameBn: c.nameBn,
-          price: c.basePrice,
-          color: getCategoryColor(c.name),
-        })));
-      }
-
-      let providersData: any[] = [];
       try {
-        const providersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/providers/nearby?latitude=23.8103&longitude=90.4125`, { headers });
+        const providersRes = await fetch(`${API_URL}/providers/nearby?latitude=23.8103&longitude=90.4125`, { headers });
         if (providersRes.ok) {
-          providersData = await providersRes.json();
+          const providersData = await providersRes.json();
+          if (Array.isArray(providersData)) {
+            setProviders(providersData.map((p: any) => ({
+              id: p.id,
+              name: p.user?.name || p.userName || 'Unknown',
+              avatar: p.user?.avatar || p.userAvatar,
+              rating: p.rating || 0,
+              jobs: p.totalJobs || 0,
+              area: p.area || 'Dhaka',
+              status: (p.status || 'OFFLINE').toLowerCase(),
+              price: p.basePrice || 300,
+            })));
+          }
         }
-      } catch {
-        console.log('Providers API not available, using mock data');
-      }
-
-      if (Array.isArray(providersData) && providersData.length > 0) {
-        setProviders(providersData.slice(0, 5).map((p: any) => ({
-          id: p.id,
-          name: p.user?.name || p.userName || 'Unknown',
-          avatar: p.user?.avatar || p.userAvatar,
-          rating: p.rating || p.avgRating || 4.5,
-          jobs: p.totalJobs || p.total_jobs || 0,
-          area: p.area || 'Dhaka',
-          status: (p.status || 'OFFLINE').toLowerCase(),
-          price: p.basePrice || p.base_price || 300,
-        })));
-      } else {
-        setProviders(mockProviders);
+      } catch (e) {
+        console.log('Providers API error:', e);
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      setProviders(mockProviders);
     } finally {
       setIsLoading(false);
     }
