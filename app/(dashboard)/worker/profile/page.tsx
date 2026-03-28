@@ -82,7 +82,7 @@ export default function WorkerProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-main pb-20 lg:pb-8">
+    <div className="min-h-screen bg-bg-main pb-5 lg:pb-8">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -120,17 +120,17 @@ export default function WorkerProfilePage() {
           </div>
 
           <div className="grid grid-cols-3 gap-3 mt-6">
-            <div className="bg-white/20 rounded-xl p-3 text-center">
+            <div className="bg-white/20 rounded-lg p-3 text-center">
               <p className="text-xl font-bold text-white">
                 {isLoading ? <Loader2 className="w-5 h-5 mx-auto animate-spin" /> : stats.totalJobs}
               </p>
               <p className="text-white/80 text-xs">সম্পন্ন কাজ</p>
             </div>
-            <div className="bg-white/20 rounded-xl p-3 text-center">
+            <div className="bg-white/20 rounded-lg p-3 text-center">
               <p className="text-xl font-bold text-white">{stats.totalReviews}</p>
               <p className="text-white/80 text-xs">রিভিউ</p>
             </div>
-            <div className="bg-white/20 rounded-xl p-3 text-center">
+            <div className="bg-white/20 rounded-lg p-3 text-center">
               <p className="text-xl font-bold text-white">
                 ৳{isLoading ? '...' : stats.totalEarnings.toLocaleString()}
               </p>
@@ -141,16 +141,16 @@ export default function WorkerProfilePage() {
       </motion.div>
 
       <div className="container-custom -mt-6 lg:mt-6">
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg rounded-lg">
           <CardContent className="p-2">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => router.push(item.href)}
-                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-bg-soft transition-colors"
+                className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-bg-soft transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-bg-soft flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-bg-soft flex items-center justify-center">
                     <item.icon className="w-5 h-5 text-text-secondary" />
                   </div>
                   <span className="font-medium text-text-primary">
@@ -163,14 +163,14 @@ export default function WorkerProfilePage() {
           </CardContent>
         </Card>
 
-        <Card className="mt-4 border-0 shadow-lg">
+        <Card className="mt-4 border-0 shadow-lg rounded-lg">
           <CardContent className="p-2">
             <button
               onClick={toggleLanguage}
-              className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-bg-soft transition-colors"
+              className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-bg-soft transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-primary-soft flex items-center justify-center">
                   <Globe className="w-5 h-5 text-primary" />
                 </div>
                 <span className="font-medium text-text-primary">
@@ -184,14 +184,14 @@ export default function WorkerProfilePage() {
           </CardContent>
         </Card>
 
-        <Card className="mt-4 border-0 shadow-lg">
+        <Card className="mt-4 border-0 shadow-lg rounded-lg">
           <CardContent className="p-2">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-red-50 transition-colors text-red-500"
+              className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-red-50 transition-colors text-red-500"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
                   <LogOut className="w-5 h-5 text-red-500" />
                 </div>
                 <span className="font-medium">
@@ -202,7 +202,7 @@ export default function WorkerProfilePage() {
           </CardContent>
         </Card>
 
-        <div className="text-center mt-8 pb-8">
+        <div className="text-center mt-8">
           <p className="text-sm text-text-muted">
             কাজ লাগবে Worker v1.0.0
           </p>
