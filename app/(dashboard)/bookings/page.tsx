@@ -144,7 +144,7 @@ export default function BookingsScreen() {
       </motion.div>
 
       <div className="px-4 mb-4">
-        <div className="flex bg-bg-soft rounded-xl p-1">
+        <div className="flex bg-bg-soft rounded-full p-1">
           <button
             onClick={() => setActiveTab("active")}
             className={cn(
@@ -199,7 +199,7 @@ export default function BookingsScreen() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden rounded-full">
                   <div className={cn("h-1", status.bg)} />
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -218,7 +218,7 @@ export default function BookingsScreen() {
                     </div>
 
                     {booking.providerName && (
-                      <div className="flex items-center gap-3 p-3 bg-bg-soft rounded-xl mb-3">
+                      <div className="flex items-center gap-3 p-3 bg-bg-soft rounded-full mb-3">
                         <Avatar className="w-10 h-10">
                           <AvatarFallback className="bg-primary-soft text-primary text-sm">
                             {booking.providerName.charAt(0)}

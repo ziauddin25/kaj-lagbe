@@ -7,7 +7,6 @@ export class CategoriesService {
 
   async findAll() {
     return this.prisma.category.findMany({
-      where: { isActive: true },
       orderBy: { name: 'asc' },
     });
   }
@@ -50,11 +49,12 @@ export class CategoriesService {
     ];
 
     for (const cat of categories) {
-      await this.prisma.category.upsert({
+      const existing = await this.prisma.category.findFirst({
         where: { name: cat.name },
-        update: {},
-        create: cat,
       });
+      if (!existing) {
+        await this.prisma.category.create({ data: cat });
+      }
     }
 
     return { message: 'Categories seeded successfully' };

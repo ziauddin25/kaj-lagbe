@@ -101,8 +101,12 @@ export class AuthService {
       await this.prisma.provider.create({
         data: {
           userId: user.id,
-          status: 'OFFLINE',
+          status: 'AVAILABLE',
           isApproved: true,
+          latitude: 23.8103,
+          longitude: 90.4125,
+          area: 'ঢাকা',
+          basePrice: 300,
         },
       });
     }

@@ -6,25 +6,33 @@ export class ProvidersService {
   constructor(private prisma: PrismaService) {}
 
   async findNearby(latitude: number, longitude: number, radiusKm: number = 10) {
-    return this.prisma.$queryRaw`
-      SELECT 
-        p.*,
-        u.name as "userName",
-        u.avatar as "userAvatar",
-        (
-          6371 * acos(
-            cos(radians(${latitude})) * cos(radians(p.latitude)) * cos(radians(p.longitude) - radians(${longitude})) +
-            sin(radians(${latitude})) * sin(radians(p.latitude))
-          )
-        ) AS distance
-      FROM "Provider" p
-      JOIN "User" u ON p."userId" = u.id
-      WHERE p.status = 'AVAILABLE'
-        AND p."isApproved" = true
-        AND p.latitude IS NOT NULL
-      ORDER BY distance ASC
-      LIMIT 20
-    `;
+    const providers = await this.prisma.provider.findMany({
+      where: {
+        status: 'AVAILABLE',
+        isApproved: true,
+        latitude: { not: null },
+      },
+      include: {
+        user: {
+          select: { name: true, avatar: true },
+        },
+      },
+      take: 20,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return providers.map(p => {
+      const dlat = ((p.latitude || 0) - latitude) * Math.PI / 180;
+      const dlng = ((p.longitude || 0) - longitude) * Math.PI / 180;
+      const a = Math.sin(dlat / 2) ** 2 + Math.cos(latitude * Math.PI / 180) * Math.cos((p.latitude || 0) * Math.PI / 180) * Math.sin(dlng / 2) ** 2;
+      const distance = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return {
+        ...p,
+        userName: p.user?.name,
+        userAvatar: p.user?.avatar,
+        distance: Math.round(distance * 100) / 100,
+      };
+    }).sort((a, b) => a.distance - b.distance);
   }
 
   async findByCategory(categoryId: string, latitude?: number, longitude?: number) {
@@ -64,7 +72,7 @@ export class ProvidersService {
       data: {
         userId,
         bio: data.bio,
-        skills: data.skills || [],
+        skills: JSON.stringify(data.skills || []),
         basePrice: data.basePrice || 300,
         address: data.address,
         area: data.area,
