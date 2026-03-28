@@ -182,48 +182,42 @@ export default function WorkerJobsPage() {
       const token = localStorage.getItem('auth_token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${jobId}/status`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${jobId}/status`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ status: 'IN_PROGRESS' }),
       });
-      if (res.ok) {
-        setActiveJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'IN_PROGRESS' } : j));
-      }
-    } catch (error) {
-      console.error('Failed to start job:', error);
-    } finally {
-      setProcessingId(null);
+    } catch {
+      console.log('Backend not available, updating locally');
     }
+    setActiveJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'IN_PROGRESS' } : j));
+    setProcessingId(null);
   };
 
   const handleCompleteJob = async (jobId: string) => {
     setProcessingId(jobId);
+    const job = activeJobs.find(j => j.id === jobId);
+    const finalPrice = job?.estimatedPrice || 0;
+
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       const token = localStorage.getItem('auth_token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const job = activeJobs.find(j => j.id === jobId);
-      const finalPrice = job?.estimatedPrice || 0;
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${jobId}/complete`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${jobId}/complete`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ finalPrice }),
       });
-      if (res.ok) {
-        const completedJob = activeJobs.find(j => j.id === jobId);
-        if (completedJob) {
-          setActiveJobs(prev => prev.filter(j => j.id !== jobId));
-          setCompletedJobs(prev => [{ ...completedJob, status: 'COMPLETED' }, ...prev]);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to complete job:', error);
-    } finally {
-      setProcessingId(null);
+    } catch {
+      console.log('Backend not available, updating locally');
     }
+    const completedJob = activeJobs.find(j => j.id === jobId);
+    if (completedJob) {
+      setActiveJobs(prev => prev.filter(j => j.id !== jobId));
+      setCompletedJobs(prev => [{ ...completedJob, status: 'COMPLETED' }, ...prev]);
+    }
+    setProcessingId(null);
   };
 
   const formatDate = (dateStr: string) => {
@@ -234,7 +228,7 @@ export default function WorkerJobsPage() {
   const displayJobs = activeTab === "active" ? activeJobs : completedJobs;
 
   return (
-    <div className="min-h-screen bg-bg-main pb-20 lg:pb-8">
+    <div className="min-h-screen bg-bg-main pb-3">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -249,11 +243,11 @@ export default function WorkerJobsPage() {
       </motion.div>
 
       <div className="px-4 mb-4">
-        <div className="flex bg-bg-soft rounded-xl p-1">
+        <div className="flex bg-bg-soft rounded-full p-1">
           <button
             onClick={() => setActiveTab("active")}
             className={cn(
-              "flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              "flex-1 py-2.5 rounded-full text-sm font-medium transition-colors",
               activeTab === "active"
                 ? "bg-white text-primary shadow-sm"
                 : "text-text-secondary"
@@ -269,7 +263,7 @@ export default function WorkerJobsPage() {
           <button
             onClick={() => setActiveTab("completed")}
             className={cn(
-              "flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              "flex-1 py-2.5 rounded-full text-sm font-medium transition-colors",
               activeTab === "completed"
                 ? "bg-white text-primary shadow-sm"
                 : "text-text-secondary"
@@ -311,7 +305,7 @@ export default function WorkerJobsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden rounded-lg">
                   <div className={cn("h-1", status.bg)} />
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">

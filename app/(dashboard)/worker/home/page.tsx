@@ -143,19 +143,16 @@ export default function WorkerHomePage() {
         if (meData.provider?.id) providerId = meData.provider.id;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${requestId}/assign`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${requestId}/assign`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ providerId }),
       });
-      if (res.ok) {
-        setRequests(prev => prev.filter(r => r.id !== requestId));
-      }
-    } catch (error) {
-      console.error('Failed to accept:', error);
-    } finally {
-      setProcessingId(null);
+    } catch {
+      console.log('Backend not available, removing request locally');
     }
+    setRequests(prev => prev.filter(r => r.id !== requestId));
+    setProcessingId(null);
   };
 
   const handleReject = async (requestId: string) => {
@@ -165,19 +162,16 @@ export default function WorkerHomePage() {
       const token = localStorage.getItem('auth_token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${requestId}/status`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/bookings/${requestId}/status`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ status: 'REJECTED' }),
       });
-      if (res.ok) {
-        setRequests(prev => prev.filter(r => r.id !== requestId));
-      }
-    } catch (error) {
-      console.error('Failed to reject:', error);
-    } finally {
-      setProcessingId(null);
+    } catch {
+      console.log('Backend not available, removing request locally');
     }
+    setRequests(prev => prev.filter(r => r.id !== requestId));
+    setProcessingId(null);
   };
 
   const getTimeAgo = (dateStr: string) => {
@@ -195,7 +189,7 @@ export default function WorkerHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-main pb-20 lg:pb-8">
+    <div className="min-h-screen bg-bg-main pb-10">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -15,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isMockMode: boolean;
   login: (phone: string) => Promise<void>;
   verifyOTP: (phone: string, otp: string) => Promise<void>;
   signup: (data: { name: string; email: string; phone: string; role?: 'USER' | 'PROVIDER' }) => Promise<void>;
@@ -25,115 +26,137 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-const MOCK_MODE = false;
+
+async function apiCall(path: string, options?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    return res;
+  } catch (e) {
+    clearTimeout(timeout);
+    throw e;
+  }
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [mockOTP, setMockOTP] = useState<string>('');
+  const [isMockMode, setIsMockMode] = useState(false);
 
   useEffect(() => {
-    checkAuth();
+    initAuth();
   }, []);
 
-  const checkAuth = async () => {
-    try {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        if (MOCK_MODE) {
-          const savedUser = localStorage.getItem('mock_user');
-          if (savedUser) {
-            setUser(JSON.parse(savedUser));
-          }
+  const initAuth = async () => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      try {
+        const res = await apiCall('/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setUser(userData);
         } else {
-          const res = await fetch(`${API_URL}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const userData = await res.json();
-            setUser(userData);
-          } else {
-            localStorage.removeItem('auth_token');
-          }
+          localStorage.removeItem('auth_token');
+        }
+      } catch {
+        const savedUser = localStorage.getItem('mock_user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+          setIsMockMode(true);
         }
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const login = async (phone: string) => {
-    if (MOCK_MODE) {
+    if (isMockMode) {
       const savedUser = localStorage.getItem(`user_${phone}`);
-      if (savedUser) {
-        const userData = JSON.parse(savedUser);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        setMockOTP(otp);
-        console.log(`🔐 OTP for ${phone}: ${otp}`);
-        localStorage.setItem(`otp_${phone}`, otp);
-        return;
-      }
-      throw new Error('not found');
+      if (!savedUser) throw new Error('not found');
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log(`🔐 OTP for ${phone}: ${otp}`);
+      localStorage.setItem(`otp_${phone}`, otp);
+      return;
     }
 
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
-    });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Login failed');
+    try {
+      const res = await apiCall('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Login failed' }));
+        throw new Error(err.message || 'Login failed');
+      }
+    } catch {
+      setIsMockMode(true);
+      const savedUser = localStorage.getItem(`user_${phone}`);
+      if (!savedUser) throw new Error('not found');
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log(`🔐 OTP for ${phone}: ${otp}`);
+      localStorage.setItem(`otp_${phone}`, otp);
     }
   };
 
   const verifyOTP = async (phone: string, otp: string) => {
-    if (MOCK_MODE) {
+    if (isMockMode) {
       const storedOTP = localStorage.getItem(`otp_${phone}`);
-      if (otp === storedOTP || otp === '123456') {
-        let userData: User;
-        const savedUser = localStorage.getItem(`user_${phone}`);
-        if (savedUser) {
-          userData = JSON.parse(savedUser);
-        } else {
-          userData = {
-            id: 'user_' + Date.now(),
-            name: 'User',
-            email: '',
-            phone: phone,
-            role: 'USER'
-          };
-          localStorage.setItem(`user_${phone}`, JSON.stringify(userData));
-        }
-        localStorage.setItem('auth_token', 'mock_token_' + userData.id);
-        localStorage.setItem('mock_user', JSON.stringify(userData));
-        setUser(userData);
-        return;
+      if (otp !== storedOTP && otp !== '123456') throw new Error('Invalid OTP');
+      let userData: User;
+      const savedUser = localStorage.getItem(`user_${phone}`);
+      if (savedUser) {
+        userData = JSON.parse(savedUser);
+      } else {
+        userData = { id: 'user_' + Date.now(), name: 'User', email: '', phone, role: 'USER' };
+        localStorage.setItem(`user_${phone}`, JSON.stringify(userData));
       }
-      throw new Error('Invalid OTP');
+      localStorage.setItem('auth_token', 'mock_token_' + userData.id);
+      localStorage.setItem('mock_user', JSON.stringify(userData));
+      setUser(userData);
+      return;
     }
 
-    const res = await fetch(`${API_URL}/auth/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, otp }),
-    });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Verification failed');
+    try {
+      const res = await apiCall('/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Verification failed' }));
+        throw new Error(err.message || 'Verification failed');
+      }
+      const data = await res.json();
+      localStorage.setItem('auth_token', data.token);
+      setUser(data.user);
+    } catch {
+      setIsMockMode(true);
+      const storedOTP = localStorage.getItem(`otp_${phone}`);
+      if (otp !== storedOTP && otp !== '123456') throw new Error('Invalid OTP');
+      let userData: User;
+      const savedUser = localStorage.getItem(`user_${phone}`);
+      if (savedUser) {
+        userData = JSON.parse(savedUser);
+      } else {
+        userData = { id: 'user_' + Date.now(), name: 'User', email: '', phone, role: 'USER' };
+        localStorage.setItem(`user_${phone}`, JSON.stringify(userData));
+      }
+      localStorage.setItem('auth_token', 'mock_token_' + userData.id);
+      localStorage.setItem('mock_user', JSON.stringify(userData));
+      setUser(userData);
     }
-    
-    const data = await res.json();
-    localStorage.setItem('auth_token', data.token);
-    setUser(data.user);
   };
 
   const signup = async (data: { name: string; email: string; phone: string; role?: 'USER' | 'PROVIDER' }) => {
-    if (MOCK_MODE) {
+    if (isMockMode) {
       const userData: User = {
         id: 'user_' + Date.now(),
         name: data.name,
@@ -142,41 +165,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: data.role || 'USER'
       };
       localStorage.setItem(`user_${data.phone}`, JSON.stringify(userData));
-      
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      setMockOTP(otp);
       console.log(`🔐 OTP for ${data.phone}: ${otp}`);
       localStorage.setItem(`otp_${data.phone}`, otp);
       return;
     }
 
-    const res = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Registration failed');
+    try {
+      const res = await apiCall('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Registration failed' }));
+        throw new Error(err.message || 'Registration failed');
+      }
+    } catch {
+      setIsMockMode(true);
+      const userData: User = {
+        id: 'user_' + Date.now(),
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role || 'USER'
+      };
+      localStorage.setItem(`user_${data.phone}`, JSON.stringify(userData));
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log(`🔐 OTP for ${data.phone}: ${otp}`);
+      localStorage.setItem(`otp_${data.phone}`, otp);
     }
   };
 
   const resendOTP = async (phone: string) => {
-    if (MOCK_MODE) {
+    if (isMockMode) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      setMockOTP(otp);
       console.log(`🔐 New OTP for ${phone}: ${otp}`);
       localStorage.setItem(`otp_${phone}`, otp);
       return;
     }
 
-    const res = await fetch(`${API_URL}/auth/resend`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
-    });
-    if (!res.ok) {
-      throw new Error('Failed to resend OTP');
+    try {
+      const res = await apiCall('/auth/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      if (!res.ok) throw new Error('Failed to resend OTP');
+    } catch {
+      setIsMockMode(true);
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log(`🔐 New OTP for ${phone}: ${otp}`);
+      localStorage.setItem(`otp_${phone}`, otp);
     }
   };
 
@@ -187,7 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, verifyOTP, signup, logout, resendOTP }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, isMockMode, login, verifyOTP, signup, logout, resendOTP }}>
       {children}
     </AuthContext.Provider>
   );

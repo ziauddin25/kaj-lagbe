@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, MapPin, Zap, Droplets, Wind, Sparkles, GraduationCap, Wrench, Star } from "lucide-react";
+import { Search, MapPin, Zap, Droplets, Wind, Sparkles, GraduationCap, Wrench, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -73,16 +73,21 @@ export default function HomeScreen() {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
-      const [categoriesRes, providersRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/categories`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/providers/nearby?latitude=23.8103&longitude=90.4125`, { headers }),
-      ]);
 
-      const categoriesData = await categoriesRes.json();
+      let categoriesData: any[] = [];
+      try {
+        const categoriesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/categories`, { headers });
+        if (categoriesRes.ok) {
+          categoriesData = await categoriesRes.json();
+        }
+      } catch {
+        console.log('Categories API not available, using defaults');
+      }
+
       if (categoriesData.length > 0) {
         setCategories(categoriesData.map((c: any) => ({
           id: c.id,
+          icon: Zap,
           name: c.name,
           nameBn: c.nameBn,
           price: c.basePrice,
@@ -90,7 +95,16 @@ export default function HomeScreen() {
         })));
       }
 
-      const providersData = await providersRes.json();
+      let providersData: any[] = [];
+      try {
+        const providersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/providers/nearby?latitude=23.8103&longitude=90.4125`, { headers });
+        if (providersRes.ok) {
+          providersData = await providersRes.json();
+        }
+      } catch {
+        console.log('Providers API not available, using mock data');
+      }
+
       if (Array.isArray(providersData) && providersData.length > 0) {
         setProviders(providersData.slice(0, 5).map((p: any) => ({
           id: p.id,
@@ -178,7 +192,7 @@ export default function HomeScreen() {
                 onClick={() => setSearchQuery("")}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
               >
-                ✕
+                <X />
               </button>
             )}
           </div>

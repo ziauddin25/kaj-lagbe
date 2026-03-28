@@ -14,7 +14,7 @@ type AuthMode = "role" | "phone" | "verify" | "details";
 
 function AuthPageContent() {
   const router = useRouter();
-  const { login, verifyOTP, signup, resendOTP, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, login, verifyOTP, signup, resendOTP, isAuthenticated, isLoading: authLoading } = useAuth();
   const [mode, setMode] = useState<AuthMode>("role");
   const [selectedRole, setSelectedRole] = useState<"USER" | "PROVIDER">("USER");
   const [phone, setPhone] = useState("");
@@ -34,7 +34,6 @@ function AuthPageContent() {
   }
 
   if (isAuthenticated) {
-    const { user } = useAuth();
     if (user?.role === 'PROVIDER') {
       router.push("/worker/home");
     } else {
