@@ -2,7 +2,7 @@
 
 import { AuthProvider } from "@/lib/auth-context";
 import { useAuth } from "@/lib/auth-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Phone, Mail, ArrowRight, Loader2, User, Wrench, Search } from "lucide-react";
@@ -25,6 +25,18 @@ function AuthPageContent() {
   const [error, setError] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
 
+  const bdPhone = phone.startsWith("0") ? phone : phone ? "0" + phone : "";
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'PROVIDER') {
+        router.push("/worker/home");
+      } else {
+        router.push("/home");
+      }
+    }
+  }, [isAuthenticated, user, router]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-bg-main flex items-center justify-center">
@@ -32,17 +44,6 @@ function AuthPageContent() {
       </div>
     );
   }
-
-  if (isAuthenticated) {
-    if (user?.role === 'PROVIDER') {
-      router.push("/worker/home");
-    } else {
-      router.push("/home");
-    }
-    return null;
-  }
-
-  const bdPhone = phone.startsWith("0") ? phone : phone ? "0" + phone : "";
 
   const handleRoleSelect = (role: "USER" | "PROVIDER") => {
     setSelectedRole(role);
