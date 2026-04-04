@@ -14,7 +14,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     PrismaModule,
     AuthModule,
     UsersModule,
-    ProvidersModule,
+    ProvidersModule ,
     CategoriesModule,
     BookingsModule,
     ReviewsModule,
